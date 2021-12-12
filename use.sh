@@ -1,4 +1,0 @@
-for ((i = 0; i < $2; i++));
-do
-zgrep "system.cpu$i.icache: access for .*miss\|system.cpu$i: T0 :\|system.cpu$i.dcache: access for .*miss\|system.l2: access for Read.*miss\|global: Read from .cpu$i.data\|global: IFetch from .cpu$i.inst\|system.l2: Create" $1 | grep -vi write | awk '{sub("system.",""); sub("cpu$i.",""); sub("T0 :","PC"); sub("access for","");sub(/].*/,"]");sub("Read from ",""); sub("IFetch from ",""); sub(" of size 64 on address",""); sub(/ C$/,""); sub("Create ",""); sub(".inst","IFetch");  sub(".data","DFetch"); sub("global:","mem"); sub("icache:","il1"); sub("dcache:","dl1"); sub("l2:","l2"); sub(": "," "); sub("^ ",""); print}'  | sed -r 's/(\w+) (\1)/\1/g' | sed 's/^[ \t]*//;s/[ \t]*$//' | sed 's/WritebackDirty/CleanEvict/g' | awk '{ $1=""; print $0 }' | sed 's/^\( \)*\(\w\)/\2/g' | sed 's/\[\([a-z0-9]*\):[a-z0-9]*\]/0x\1/g' | tr -s " " |  gzip > output_$i.trace.gz;
-done
